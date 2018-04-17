@@ -23,5 +23,5 @@ postgres-server:
    - "4432:5432"
   restart: on-failure:10
   environment:
-    POSTGRES_DB_NAME: "lite_analytics"
+    POSTGRES_DB_NAME: "analytics"
     ANALYTICS_DB_USER: "analytics"
