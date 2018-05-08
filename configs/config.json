@@ -33,6 +33,11 @@
       "name": "Diagnoses Data",
       "type": "diagnoses",
       "columnsToIgnore": []
+    },
+    {
+      "name": "Orders Data",
+      "type": "orders",
+      "chunkSizeToRead": 20000
     }
   ],
   "views": [
