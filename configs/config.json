@@ -64,5 +64,9 @@
     }
   ],
   "views": [
+    {
+      "name": "patient_diagnosis_condition_view",
+      "sourceFilePath": "classpath:viewSql/patientDiagnosisConditionView.sql"
+    }
   ]
 }
