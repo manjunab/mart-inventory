@@ -28,7 +28,7 @@
       "type": "reg",
       "columnsToIgnore": [],
       "separateTables": []
-    }/*,
+    },
     {
       "name": "Diagnoses Data",
       "type": "diagnoses",
@@ -61,7 +61,7 @@
         "FUP, Comments about next follow-up",
         "FSTG, Comments about refusal"
       ]
-    }*/
+    }
   ],
   "views": [
     {
