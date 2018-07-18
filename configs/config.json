@@ -1,72 +1,222 @@
 {
   "jobs": [
     {
-      "name": "Program data",
-      "type": "customSql",
-      "readerSql": "SELECT program_id, name AS program_name, description AS program_description, creator, date_created, date_changed, changed_by FROM program WHERE retired = FALSE",
-      "chunkSizeToRead": "500",
-      "tableName": "programs",
-      "columnsToIgnore": []
+      "name": "Programs",
+      "type": "programs",
+      "chunkSizeToRead": "500"
     },
     {
-      "name": "Program outcomes",
-      "type": "customSql",
-      "readerSql": "SELECT p.program_id, p.name AS `program_name`, cv.concept_full_name AS `program_outcome` FROM program p INNER JOIN concept c ON c.concept_id = p.outcomes_concept_id AND c.retired = FALSE AND p.retired = FALSE INNER JOIN concept_set cs ON cs.concept_set = c.concept_id LEFT OUTER JOIN concept_view cv ON cv.concept_id = cs.concept_id AND cv.retired = FALSE",
-      "chunkSizeToRead": "500",
-      "tableName": "program_outcomes",
-      "columnsToIgnore": []
+      "name": "Patients",
+      "type": "patients",
+      "chunkSizeToRead": "500"
     },
     {
-      "name": "Conditions",
-      "type": "customSql",
-      "readerSql": "SELECT condition_id, previous_condition_id, patient_id, status, coalesce(condition_non_coded, cv.concept_full_name) AS condition_name, CASE WHEN condition_non_coded IS NULL THEN TRUE ELSE FALSE END AS is_coded_condition_name, onset_date, additional_detail, end_date, end_reason, concat_ws(' ', ifnull(pn.given_name, ''), ifnull(pn.family_name, '')) AS creator_name, conditions.date_created FROM conditions INNER JOIN concept_view cv ON cv.concept_id = conditions.concept_id AND conditions.voided = 0 AND cv.retired = 0 INNER JOIN users ON users.user_id = conditions.creator INNER JOIN person_name pn ON pn.person_id = users.person_id",
+      "name": "Appointments",
+      "type": "appointments",
       "chunkSizeToRead": "500",
-      "tableName": "conditions"
+      "groupedJobConfigs": [
+        {
+          "tableName": "appointment_service_default",
+          "columnsToIgnore": [
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bed Management",
+      "type": "bedManagement",
+      "chunkSizeToRead": "500"
+    },
+    {
+      "name": "Location",
+      "type": "location",
+      "chunkSizeToRead": "500"
+    },
+    {
+      "name": "Operation Theater",
+      "type": "operationTheater",
+      "chunkSizeToRead": "500"
+    },
+    {
+      "name": "Person",
+      "type": "person",
+      "chunkSizeToRead": "500",
+      "groupedJobConfigs": [
+        {
+          "tableName": "person_attributes",
+          "columnsToIgnore": [
+            "primaryContact",
+            "secondaryContact",
+            "primaryRelative",
+            "familyNameLocal",
+            "givenNameLocal",
+            "middleNameLocal"
+          ]
+        },
+        {
+          "tableName": "person_details_default",
+          "columnsToIgnore": [
+            "prefix",
+            "given_name",
+            "middle_name",
+            "family_name_prefix",
+            "family_name",
+            "family_name2",
+            "family_name_suffix"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Provider",
+      "type": "provider",
+      "chunkSizeToRead": "500"
+    },
+    {
+      "name": "Visits And Encounters",
+      "type": "visitsAndEncounters",
+      "chunkSizeToRead": "500"
+    },
+    {
+      "name": "Medication And Orders",
+      "type": "medicationAndOrders",
+      "chunkSizeToRead": "500",
+      "groupedJobConfigs": [
+        {
+          "tableName": "medication_data_default",
+          "columnsToIgnore": [
+            "instructions",
+            "stop_notes"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Diagnoses And Conditions",
+      "type": "diagnosesAndConditions",
+      "chunkSizeToRead": "500"
+    },
+    {
+      "name": "Bacteriology Data",
+      "conceptReferenceSource": "",
+      "type": "bacteriology",
+      "incrementalUpdateConfig": {
+        "updateOn": "encounter_id",
+        "eventCategory": "Encounter",
+        "openmrsTableName": "encounter"
+      }
+    },
+    {
+      "name": "MetaData Dictionary",
+      "type": "metadata",
+      "conceptReferenceSource": ""
+    },
+    {
+      "name": "Obs Data",
+      "type": "obs",
+      "incrementalUpdateConfig": {
+        "updateOn": "encounter_id",
+        "eventCategory": "Encounter",
+        "openmrsTableName": "encounter"
+      },
+      "separateTableConfig": {
+        "enableForAddMoreAndMultiSelect": true,
+        "separateTables": [
+        ]
+      },
+      "conceptReferenceSource": "",
+      "ignoreAllFreeTextConcepts": true,
+      "columnsToIgnore": [
+        "Image"
+      ]
     },
     {
       "name": "Registration Second Page",
       "type": "reg",
       "columnsToIgnore": [],
-      "separateTables": []
+      "separateTableConfig": {
+        "enableForAddMoreAndMultiSelect": true,
+        "separateTables": []
+      },
+      "incrementalUpdateConfig": {
+        "updateOn": "encounter_id",
+        "eventCategory": "Encounter",
+        "openmrsTableName": "encounter"
+      }
     },
     {
-      "name": "Diagnoses Data",
-      "type": "diagnoses",
-      "columnsToIgnore": []
+      "name": "Disposition Data",
+      "type": "disposition",
+      "columnsToIgnore": [],
+      "incrementalUpdateConfig": {
+        "updateOn": "encounter_id",
+        "eventCategory": "Encounter",
+        "openmrsTableName": "encounter"
+      }
+    }
+  ],
+  "procedures":[
+    {
+      "name":"Discharge Date Procedure",
+      "sourceFilePath":"classpath:procedureSql/dischargeDateProc.sql"
     },
     {
-      "name": "Orders Data",
-      "type": "orders",
-      "chunkSizeToRead": 20000
-    },
-    {
-      "name": "Obs Data",
-      "type": "obs",
-      "separateTables": [
-        "PA, Location of Assessment",
-        "SMH, Pain Assessment",
-        "FV, Outcomes FV"
-      ],
-      "conceptReferenceSource": "MSF-INTERNAL",
-      "ignoreAllFreeTextConcepts": true,
-      "columnsToIgnore": [
-        "Video",
-        "Image",
-        "Documents, Image Upload",
-        "Documents, Image",
-        "Radiology Documents",
-        "FSTG, Comments",
-        "CC, Additional comments, complications",
-        "FUP, Comments about dismissal",
-        "FUP, Comments about next follow-up",
-        "FSTG, Comments about refusal"
-      ]
+      "name":"Age Group Procedure",
+      "sourceFilePath":"classpath:procedureSql/ageGroupProc.sql"
     }
   ],
   "views": [
     {
+      "name": "patient_program_view",
+      "sourceFilePath":"classpath:viewSql/patientProgramView.sql"
+    },
+    {
+      "name": "patient_visits_encounters_view",
+      "sourceFilePath": "classpath:viewSql/patientVisitsEncountersView.sql"
+    },
+    {
+      "name": "appointment_admin_panel_view",
+      "sql": "SELECT * FROM appointment_service_default LEFT OUTER JOIN service_availability_default USING (appointment_service_id, service_name)"
+    },
+    {
+      "name": "patient_details_view",
+      "sourceFilePath": "classpath:viewSql/patientDetailsView.sql"
+    },
+    {
+      "name": "patient_information_view",
+      "sourceFilePath": "classpath:viewSql/patientInformationView.sql"
+    },
+    {
+      "name":"bed_management_view",
+      "sourceFilePath":"classpath:viewSql/bedManagementView.sql"
+    },
+    {
+      "name":"bed_management_locations_view",
+      "sourceFilePath":"classpath:viewSql/locationWiseDischarge.sql"
+    },
+    {
+      "name": "patient_bed_view",
+      "sourceFilePath": "classpath:viewSql/patientBedView.sql"
+    },
+    {
+      "name": "patient_operation_theater_view",
+      "sourceFilePath": "classpath:viewSql/patientOperationTheaterView.sql"
+    },
+    {
+      "name": "patient_appointment_view",
+      "sourceFilePath": "classpath:viewSql/patientAppointmentView.sql"
+    },
+    {
+      "name": "patient_program_medication_view",
+      "sourceFilePath": "classpath:viewSql/patientProgramMedicationView.sql"
+    },
+    {
       "name": "patient_diagnosis_condition_view",
       "sourceFilePath": "classpath:viewSql/patientDiagnosisConditionView.sql"
+    },
+    {
+      "name": "patient_bed_tags_history_view",
+      "sourceFilePath": "classpath:viewSql/patientBedTagView.sql"
     }
   ]
 }
